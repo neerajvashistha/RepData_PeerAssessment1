@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -14,11 +9,11 @@ site:
 
 Load data into data frame `data`. 
 
-```{r}
+
+```r
 data <- read.csv("activity/activity.csv")
 data$steps <- as.numeric(data$steps)
 data$interval <- as.numeric(data$interval)
-
 ```
 
 The variables included in this dataset are:
@@ -39,7 +34,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 Ignoring the missing values in the dataset.
 Sum steps by day, create Histogram, and calculate mean and median.
 
-```{r fig1,fig.height=4}
+
+```r
 stepsDate<-aggregate(steps ~ date, data = data, sum,na.rm=TRUE)
 hist(stepsDate$steps,
      breaks=60, 
@@ -48,19 +44,19 @@ hist(stepsDate$steps,
      main="Daily Number Steps" )
 ```
 
+![](PA1_template_files/figure-html/fig1-1.png) 
 
-```{r echo=FALSE}
-mean1 <- mean(stepsDate$steps)
-median1 <- median(stepsDate$steps)
-```
 
-The `mean` is `r mean1` and the `median` is `r median1`.
+
+
+The `mean` is 1.0766189\times 10^{4} and the `median` is 1.0765\times 10^{4}.
 
 
 ## What is the average daily activity pattern?
 Next a time-series plot was made which shows the 5-minute interval average of number of steps taken and averaged across all days.
 
-```{r fig2,fig.height=4,warning=FALSE}
+
+```r
 data$date <- as.character(data$date)
 stepsInterval <- tapply(data$steps, data$interval, mean, na.rm = TRUE)
 library(lattice)
@@ -70,19 +66,20 @@ plot(stepsInterval,
      ylab="Average All Days",
      main="Average Steps Taken")
 ```
-`r max_intr<-names(which.max(stepsInterval))`
-The 5-minute interval, on average across all the days in the data set, containing the maximum number of steps is `r max_intr`.
+
+![](PA1_template_files/figure-html/fig2-1.png) 
+
+The 5-minute interval, on average across all the days in the data set, containing the maximum number of steps is 835.
 
 ## Imputing missing values
-```{r echo=FALSE,results='hide'}
-sumMissing <- sum(is.na(data))
-```
-The total number of missing values in the dataset (i.e. the total number of rows with `r NA`s) are `r sumMissing`
+
+The total number of missing values in the dataset (i.e. the total number of rows with NAs) are 2304
 
 Missing data needed to be imputed. Only a simple imputation approach was required for this assignment. 
 
 Missing values were imputed by inserting the mean for each interval. Thus, if interval 15 was missing on 2012-10-01, the mean for that interval for all days (0.1509434), replaced the NA. 
-```{r}
+
+```r
 meanByInterval <- tapply(data$steps, data$interval, mean, na.rm = TRUE)
 imputed <- data
 imputed[is.na(data)] <- meanByInterval
@@ -90,7 +87,8 @@ imputed[as.character(imputed$date) == "2012-10-01",1] <- 0
 ```
 Now, a new data frame is created `imputed`, which is contains the mean values for each interval.
 Again, a histogram is created for the total number of steps taken each day which is compared graphically with the original dataset `data` for the total number of steps taken each day .
-```{r fig3,fig.height=5,fig.width=6}
+
+```r
 CurrStepsDate<-aggregate(steps ~ date, data = imputed, sum,na.rm=TRUE)
 hist(CurrStepsDate$steps,
       col="blue",
@@ -106,32 +104,38 @@ hist(stepsDate$steps,
 legend("topright", c("Imputed", "Non-imputed"), col=c("blue", "red"), lwd=10)
 ```
 
+![](PA1_template_files/figure-html/fig3-1.png) 
+
 Calculate new mean and median for imputed data. 
 
-```{r}
+
+```r
 mean2 <- mean(CurrStepsDate$steps)
 median2 <- median(CurrStepsDate$steps)
 ```
 
 Calculate difference between imputed and non-imputed data.
 
-```{r}
+
+```r
 mean_diff <- mean2-mean1
 median_diff <- median2 - median1
 ```
 
 Calculate total difference.
 
-```{r}
+
+```r
 total_diff <- sum(CurrStepsDate$steps) - sum(stepsDate$steps)
 ```
-* The imputed data mean is `r mean2` and median is `r median2`
-* The difference between the non-imputed mean and imputed mean is `r mean_diff` and for median is `r median_diff`
-* The total difference between number of steps between imputed and non-imputed data is`r total_diff`, which indicate that there were `r total_diff` more steps in the imputed data.
+* The imputed data mean is 1.0589694\times 10^{4} and median is 1.0766189\times 10^{4}
+* The difference between the non-imputed mean and imputed mean is -176.4948964 and for median is 1.1886792
+* The total difference between number of steps between imputed and non-imputed data is7.5363321\times 10^{4}, which indicate that there were 7.5363321\times 10^{4} more steps in the imputed data.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 Next, using the real and imputed data, we determine a time-series for the number of steps taken on average on the weekend versus the weekday by this individual.
-```{r fig4}
+
+```r
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 imputed$dow <- as.factor(ifelse(is.element(weekdays(as.Date(imputed$date)),weekdays), "Weekday", "Weekend"))
 
@@ -143,7 +147,7 @@ xyplot(stepsIntervalByDow$steps ~ stepsIntervalByDow$interval|stepsIntervalByDow
        ylab="Steps",
        layout=c(1,2),
        type="l")
-
-
 ```
+
+![](PA1_template_files/figure-html/fig4-1.png) 
 
